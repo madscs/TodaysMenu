@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Todays Menu</string>
+
+    <string name="loading_text">Loading&#8230;</string>
+    <string name="loading_main_course_text">Getting the menu&#8230;</string>
+    <string name="loading_sides_text">Vidste du at&#8230;\nDu kan swipe til venstre eller højre for at se menuen for andre dage?</string>
+    <string name="action_settings">Settings</string>
+    <string name="test_text">This is a test</string>
+    <string name="likes_text">0</string>
+    <string name="dislikes_text">0</string>
+    <string name="menu_not_ready_text">Kokken arbejder hårdt, men dagens menu er endnu ikke klar</string>
+    <string name="menu_not_ready_facebook_link_text">Besøg Facebook-siden for mere information\n\n
+        <a href="https://www.facebook.com/Cuisine.dk">Gå til Facebook</a></string>
+    <string name="facebook_link_text"><a href="https://www.facebook.com/Cuisine.dk">Gå til Facebook</a></string>
+
+
+</resources>
