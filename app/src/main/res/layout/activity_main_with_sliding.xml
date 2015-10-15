@@ -1,0 +1,151 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".ScreenSlidePageFragment">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/cakeDayId"
+        android:src="@drawable/cakeday"
+        android:adjustViewBounds="true"
+        android:maxWidth="100dp"
+        android:maxHeight="100dp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/todaysMenuTextId"
+        android:src="@drawable/todaysmenu"
+        android:layout_centerHorizontal="true"
+        android:adjustViewBounds="true"
+        android:maxWidth="225dp"
+        android:maxHeight="225dp"
+        android:layout_marginTop="35dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/forkAndKnifeId"
+        android:src="@drawable/forkandknife"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:adjustViewBounds="true"
+        android:maxWidth="80dp"
+        android:maxHeight="80dp"
+        android:layout_marginTop="250dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:id="@+id/bottomWaveId"
+        android:src="@drawable/bottomwave"
+        android:layout_alignParentBottom="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:id="@+id/thumbsUpId"
+        android:src="@drawable/thumbsup"
+        android:adjustViewBounds="true"
+        android:maxWidth="28dp"
+        android:maxHeight="28dp"
+        android:layout_marginLeft="145dp"
+        android:layout_marginStart="145dp"
+        android:layout_marginBottom="16dp"
+        android:layout_alignParentBottom="true"
+        />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:id="@+id/thumbsDownId"
+        android:src="@drawable/thumbsdown"
+        android:adjustViewBounds="true"
+        android:maxWidth="28dp"
+        android:maxHeight="28dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="145dp"
+        android:layout_marginEnd="145dp"
+        android:layout_marginBottom="7dp"
+        />
+
+    <TextView android:text="@string/likes_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/likesText"
+        android:layout_marginLeft="120dp"
+        android:layout_marginStart="120dp"
+        android:layout_marginBottom="15dp"
+        android:layout_alignParentBottom="true"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"/>
+
+    <TextView android:text="@string/dislikes_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/dislikesText"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="120dp"
+        android:layout_marginEnd="120dp"
+        android:layout_marginBottom="15dp"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"/>
+
+    <TextView android:text="@string/loading_main_course_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mainCourseText"
+        android:gravity="center"
+        android:layout_below="@+id/todaysMenuTextId"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:maxWidth="325dp"
+        android:maxHeight="105dp"
+        android:textSize="20sp"/>
+
+    <TextView android:text="@string/loading_sides_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/sidesText"
+        android:gravity="center"
+        android:layout_below="@+id/forkAndKnifeId"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:maxWidth="325dp"
+        android:textSize="12sp"/>
+
+    <TextView android:text="@string/menu_not_ready_facebook_link_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/visitFacebookText"
+        android:gravity="center"
+        android:layout_below="@+id/forkAndKnifeId"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:maxWidth="325dp"
+        android:textSize="12sp"
+        android:visibility="gone"/>
+
+    <TextView android:text="@string/test_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/testTextView"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:maxWidth="325dp"
+        android:textSize="12sp"/>
+
+</RelativeLayout>

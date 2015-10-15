@@ -41,7 +41,7 @@ public class RestActivity extends Activity {
     TextView sidesTextView, mainCourseTextView, testTextView, likesTextView, dislikesTextView,
             visitFacebookTextView;
     ImageView cakeDayImageView, thumbsDownId, thumbsUpId, forkAndKnifeImageView;
-    String API = "https://unwire-menu.herokuapp.com";
+
     int greyColor = Color.parseColor("#979797");
     int whiteColor = Color.parseColor("#FFFFFF");
     private float x1, x2;
@@ -49,6 +49,7 @@ public class RestActivity extends Activity {
     private String updatedAtDate, deviceId;
 
     // Retrofit
+    String API = "https://unwire-menu.herokuapp.com";
     RestAdapter restAdapter = new RestAdapter.Builder()
             .setEndpoint(API)
             .setLogLevel(RestAdapter.LogLevel.FULL)
@@ -87,7 +88,7 @@ public class RestActivity extends Activity {
 //
 //    // Realm method
 //    public void add(final int ticketState) {
-//        menu.getFeed(new Callback<List<MenuModel>>() {
+//        menu.getMenu(new Callback<List<MenuModel>>() {
 //            @Override
 //            public void success(List<MenuModel> menuModel, Response response) {
 //                Realm realm = Realm.getInstance(getApplicationContext());
@@ -212,8 +213,8 @@ public class RestActivity extends Activity {
         sidesTextView.setText(R.string.loading_sides_text);
         visitFacebookTextView.setVisibility(View.INVISIBLE);
 
-        // Retrofit getFeed
-        menu.getFeed(new Callback<List<MenuModel>>() {
+        // Retrofit getMenu
+        menu.getMenu(new Callback<List<MenuModel>>() {
             @Override
             public void success(List<MenuModel> menuModel, Response response) {
                 // Set like and dislike values from retrofit
@@ -227,7 +228,7 @@ public class RestActivity extends Activity {
                 // Get the date from retrofit
                 updatedAtDate = menuModel.get(menuDayChooser).getUpdatedAt();
 
-                // If menu has not arrived, else...
+                // If menu has not arrived, else show today's menu
                 if (menuDayChooser == 0 && !isTodaysMenuAvailable && !isLocalDateCorrect()) {
                     sidesTextView.setVisibility(View.INVISIBLE);
                     visitFacebookTextView.setVisibility(View.VISIBLE);

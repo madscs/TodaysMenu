@@ -14,7 +14,10 @@ import retrofit.http.Path;
 
 public interface MenuApi {
     @GET("/menus")
-    void getFeed(Callback<List<MenuModel>> response);
+    void getMenu(Callback<List<MenuModel>> response);
+
+    @GET("/menus?limit=1")
+    void getFirstMenuItem(Callback<List<MenuModel>> response);
 
     @POST("/votes/{like}")
     void setVote(@Body LikeTask likeTask, @Path("like") String like,
