@@ -14,6 +14,8 @@ import android.widget.TextView;
 import com.unwire.todaysmenu.API.MenuApi;
 import com.unwire.todaysmenu.model.MenuModel;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +43,7 @@ public class ScreenSlidePageFragment extends Fragment {
     private String deviceId;
 
     // int value to determine the current fragment
-    int currentFragment;
+    int currentFragment = 0;
 
     // Colours for like and dislike buttons
     int greyColor = Color.parseColor("#979797");
@@ -70,12 +72,16 @@ public class ScreenSlidePageFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentFragment = getArguments() != null ? getArguments().getInt("num") : 1;
+        // Set currentFragment according to whether or not the date is correct.
+        if (isLocalDateCorrect()) {
+            currentFragment = getArguments() != null ? getArguments().getInt("num") : 1;
+        } else {
+            currentFragment = (getArguments() != null ? getArguments().getInt("num") : 1) - 1;
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         // Inflate layout for this fragment
         return inflater.inflate(R.layout.activity_main, container, false);
     }
@@ -100,30 +106,90 @@ public class ScreenSlidePageFragment extends Fragment {
         testTextView = (TextView) view.findViewById(R.id.testTextView);
         testTextView.setText(String.valueOf("Fragment #" + currentFragment));
 
-        // Retrofit getFirstMenuItem
-        menu.getMenu(new Callback<List<MenuModel>>() {
-            @Override
-            public void success(List<MenuModel> menuModel, Response response) {
-                // Set like and dislike values from retrofit
-                likesTextView.setText(String.valueOf(menuModel
-                        .get(currentFragment)
-                        .getLikes()));
-                dislikesTextView.setText(String.valueOf(menuModel
-                        .get(currentFragment)
-                        .getDislikes()));
+        // If menu has not arrived, else show today's menu
+        if (currentFragment == -1) {
+            sidesTextView.setVisibility(View.INVISIBLE);
+            visitFacebookTextView.setVisibility(View.VISIBLE);
+            mainCourseTextView.setText(R.string.menu_not_ready_text);
+            cakeDayImageView.setVisibility(View.GONE);
+            likesTextView.setVisibility(View.INVISIBLE);
+            dislikesTextView.setVisibility(View.INVISIBLE);
+            thumbsDownId.setVisibility(View.INVISIBLE);
+            thumbsUpId.setVisibility(View.INVISIBLE);
+        } else {
+            // Retrofit getMenu
+            menu.getMenu(new Callback<List<MenuModel>>() {
+                @Override
+                public void success(List<MenuModel> menuModel, Response response) {
+                    // Set like and dislike values from retrofit
+                    likesTextView.setText(String.valueOf(menuModel
+                            .get(currentFragment)
+                            .getLikes()));
+                    dislikesTextView.setText(String.valueOf(menuModel
+                            .get(currentFragment)
+                            .getDislikes()));
 
-                // Set main course and sides text for menu of the day
-                mainCourseTextView.setText(menuModel.get(currentFragment).getMainCourse());
-                sidesTextView.setText(menuModel.get(currentFragment).getSides());
-            }
+                    sidesTextView.setVisibility(View.VISIBLE);
+                    visitFacebookTextView.setVisibility(View.INVISIBLE);
+                    likesTextView.setVisibility(View.VISIBLE);
+                    dislikesTextView.setVisibility(View.VISIBLE);
+                    thumbsDownId.setVisibility(View.VISIBLE);
+                    thumbsUpId.setVisibility(View.VISIBLE);
 
-            @Override
-            public void failure(RetrofitError error) {
-                error.getMessage();
-            }
-        });
+                    // Set main course and sides text for menu of the day
+                    sidesTextView.setText(menuModel.get(currentFragment).getSides());
+                    mainCourseTextView.setText(menuModel.get(currentFragment).getMainCourse());
+
+                    // Should cake day sign be shown or not
+                    if (menuModel.get(currentFragment).getCake()) {
+                        cakeDayImageView.setVisibility(View.VISIBLE);
+                    } else {
+                        cakeDayImageView.setVisibility(View.INVISIBLE);
+                    }
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    sidesTextView.setText(error.getMessage());
+                    mainCourseTextView.setText(error.getMessage());
+                }
+            });
+        }
+
 
         getDeviceId();
+    }
+
+    private boolean isLocalDateCorrect() {
+        boolean isDateCorrect;
+
+        java.util.TimeZone tz = java.util.TimeZone.getTimeZone("GMT+1");
+
+        // Set format of date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        Calendar cal = Calendar.getInstance(tz);
+        String localDate = dateFormat.format(cal.getTime());
+
+        // Format date to be with '-' instead of '/'
+        localDate = localDate.replaceAll("/", "-");
+
+        // Remove weekday from DateFormat (if EEE is added before yyyy/MM/dd)
+        // localDate = localDate.substring(4);
+
+        // Changes the date of the month for testing purposes
+        // localDate = localDate.replaceAll("16", "17");
+
+        // Make a substring of the first part of the string (until "T") and delete the rest
+        int indexOfT = ScreenSlidePagerActivity.updatedAtDate.indexOf('T');
+        String substringOfUpdatedAtDate = ScreenSlidePagerActivity.updatedAtDate.substring(0, indexOfT);
+
+        // Checks if the date from retrofit is equal to the local date
+        if (substringOfUpdatedAtDate.equals(localDate)) {
+            isDateCorrect = true;
+        } else {
+            isDateCorrect = false;
+        }
+        return isDateCorrect;
     }
 
     public void onClick(View view) {
@@ -149,21 +215,7 @@ public class ScreenSlidePageFragment extends Fragment {
         deviceId = deviceUuid.toString();
     }
 
-    public void setDislikeAndLikeColor() {
-        if (state == NON_VOTED_STATE) {
-            thumbsUpId.setColorFilter(whiteColor);
-            thumbsDownId.setColorFilter(whiteColor);
-        } else if (state == LIKED_STATE) {
-            thumbsUpId.setColorFilter(greyColor);
-            thumbsDownId.setColorFilter(whiteColor);
-        } else {
-            thumbsUpId.setColorFilter(whiteColor);
-            thumbsDownId.setColorFilter(greyColor);
-        }
-    }
-
     private void onThumbsUp() {
-
         menu.setVote(new LikeTask(deviceId), "like", new Callback<List<MenuModel>>() {
             @Override
             public void success(List<MenuModel> menuModel, Response response) {
@@ -180,7 +232,6 @@ public class ScreenSlidePageFragment extends Fragment {
     }
 
     private void onThumbsDown() {
-
         menu.setVote(new LikeTask((deviceId)), "dislike", new Callback<List<MenuModel>>() {
             @Override
             public void success(List<MenuModel> menuModel, Response response) {
@@ -196,4 +247,16 @@ public class ScreenSlidePageFragment extends Fragment {
         });
     }
 
+    public void setDislikeAndLikeColor() {
+        if (state == NON_VOTED_STATE) {
+            thumbsUpId.setColorFilter(whiteColor);
+            thumbsDownId.setColorFilter(whiteColor);
+        } else if (state == LIKED_STATE) {
+            thumbsUpId.setColorFilter(greyColor);
+            thumbsDownId.setColorFilter(whiteColor);
+        } else {
+            thumbsUpId.setColorFilter(whiteColor);
+            thumbsDownId.setColorFilter(greyColor);
+        }
+    }
 }

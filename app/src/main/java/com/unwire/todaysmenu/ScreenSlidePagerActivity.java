@@ -31,6 +31,8 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
 
     public static int NUM_PAGES = 0;
 
+    public static String updatedAtDate;
+
     // ViewPager and PagerAdapter for swiping views
     private ViewPager mPager;
 
@@ -47,6 +49,9 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
             public void success(List<MenuModel> menuModel, Response response) {
                 // Get the highest ID to tell PagerAdapter how many pages we're gonna show
                 NUM_PAGES = menuModel.get(0).getId() + 1;
+
+                // Get the date from retrofit
+                updatedAtDate = menuModel.get(0).getUpdatedAt();
 
                 // Notify PagerAdapter that we're changing the value of NUM_PAGES
                 mPagerAdapter.notifyDataSetChanged();
