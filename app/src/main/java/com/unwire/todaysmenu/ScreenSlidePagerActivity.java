@@ -44,11 +44,12 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
         setContentView(R.layout.activity_screen_slide);
 
         // Retrofit getFirstMenuItem
-        menu.getFirstMenuItem(new Callback<List<MenuModel>>() {
+        menu.getMenu(new Callback<List<MenuModel>>() {
             @Override
             public void success(List<MenuModel> menuModel, Response response) {
                 // Get the highest ID to tell PagerAdapter how many pages we're gonna show
-                NUM_PAGES = menuModel.get(0).getId() + 1;
+
+                NUM_PAGES = menuModel.size();
 
                 // Get the date from retrofit
                 updatedAtDate = menuModel.get(0).getUpdatedAt();

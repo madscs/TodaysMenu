@@ -43,6 +43,7 @@ public class ScreenSlidePageFragment extends Fragment {
     private String deviceId;
 
     // int value to determine the current fragment
+    // Should never be static (fragments won't update properly)
     int currentFragment = 0;
 
     // Colours for like and dislike buttons
@@ -155,7 +156,6 @@ public class ScreenSlidePageFragment extends Fragment {
                 }
             });
         }
-
 
         getDeviceId();
     }
