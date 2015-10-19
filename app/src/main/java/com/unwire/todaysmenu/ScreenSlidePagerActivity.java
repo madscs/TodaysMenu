@@ -12,6 +12,7 @@ import android.view.View;
 import com.unwire.todaysmenu.API.MenuApi;
 import com.unwire.todaysmenu.model.MenuModel;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import retrofit.Callback;
@@ -29,9 +30,9 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
             .build();
     MenuApi menu = restAdapter.create(MenuApi.class);
 
-    public static int NUM_PAGES = 0;
+    public static int NUM_PAGES = 0, servingDate;
 
-    public static String updatedAtDate;
+    public static String convertedServingDate;
 
     // ViewPager and PagerAdapter for swiping views
     private ViewPager mPager;
@@ -52,7 +53,12 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
                 NUM_PAGES = menuModel.size();
 
                 // Get the date from retrofit
-                updatedAtDate = menuModel.get(0).getUpdatedAt();
+                servingDate = menuModel.get(0).getServingDate();
+
+                convertedServingDate = String.valueOf(new java.util.Date((long) servingDate * 1000));
+
+                // Remove last 19 chars of String to get a simpler date
+                convertedServingDate = convertedServingDate.substring(0, convertedServingDate.length() - 19);
 
                 // Notify PagerAdapter that we're changing the value of NUM_PAGES
                 mPagerAdapter.notifyDataSetChanged();

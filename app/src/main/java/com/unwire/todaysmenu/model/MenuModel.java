@@ -8,36 +8,38 @@ public class MenuModel {
     @SerializedName("cake")
     @Expose
     private Boolean cake;
-    @SerializedName("created_at")
-    @Expose
-    private String createdAt;
+
     @SerializedName("dislikes")
     @Expose
     private Integer dislikes;
+
     @SerializedName("id")
     @Expose
     private Integer id;
-    @SerializedName("identifier")
-    @Expose
-    private String identifier;
+
     @SerializedName("likes")
     @Expose
     private Integer likes;
+
     @SerializedName("link")
     @Expose
     private String link;
+
     @SerializedName("main_course")
     @Expose
     private String mainCourse;
+
     @SerializedName("serving_date")
     @Expose
     private Integer servingDate;
+
     @SerializedName("sides")
     @Expose
     private String sides;
-    @SerializedName("updated_at")
+
+    @SerializedName("user_vote")
     @Expose
-    private String updatedAt;
+    private Integer userVote;
 
     /**
      * @return The cake
@@ -51,20 +53,6 @@ public class MenuModel {
      */
     public void setCake(Boolean cake) {
         this.cake = cake;
-    }
-
-    /**
-     * @return The createdAt
-     */
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    /**
-     * @param createdAt The created_at
-     */
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
     }
 
     /**
@@ -93,20 +81,6 @@ public class MenuModel {
      */
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    /**
-     * @return The identifier
-     */
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    /**
-     * @param identifier The identifier
-     */
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
     }
 
     /**
@@ -180,17 +154,18 @@ public class MenuModel {
     }
 
     /**
-     * @return The updatedAt
+     * @return The userVote
      */
-    public String getUpdatedAt() {
-        return updatedAt;
+    public Integer getUserVote() {
+        return userVote;
     }
 
     /**
-     * @param updatedAt The updated_at
+     * @param userVote The user_vote
      */
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setUserVote(Integer userVote) {
+        this.userVote = userVote;
     }
+
 
 }

@@ -39,7 +39,7 @@ public class ScreenSlidePageFragment extends Fragment {
             visitFacebookTextView;
     private ImageView cakeDayImageView, thumbsDownId, thumbsUpId, forkAndKnifeImageView;
 
-    // DeviceId
+    // String values
     private String deviceId;
 
     // int value to determine the current fragment
@@ -105,7 +105,8 @@ public class ScreenSlidePageFragment extends Fragment {
         forkAndKnifeImageView = (ImageView) view.findViewById(R.id.forkAndKnifeId);
 
         testTextView = (TextView) view.findViewById(R.id.testTextView);
-        testTextView.setText(String.valueOf("Fragment #" + currentFragment));
+        testTextView.setText(ScreenSlidePagerActivity.convertedServingDate
+                + String.valueOf(" Fragment #" + currentFragment));
 
         // If menu has not arrived, else show today's menu
         if (currentFragment == -1) {
@@ -166,25 +167,20 @@ public class ScreenSlidePageFragment extends Fragment {
         java.util.TimeZone tz = java.util.TimeZone.getTimeZone("GMT+1");
 
         // Set format of date
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd");
         Calendar cal = Calendar.getInstance(tz);
         String localDate = dateFormat.format(cal.getTime());
 
         // Format date to be with '-' instead of '/'
         localDate = localDate.replaceAll("/", "-");
 
-        // Remove weekday from DateFormat (if EEE is added before yyyy/MM/dd)
-        // localDate = localDate.substring(4);
-
         // Changes the date of the month for testing purposes
         // localDate = localDate.replaceAll("16", "17");
 
-        // Make a substring of the first part of the string (until "T") and delete the rest
-        int indexOfT = ScreenSlidePagerActivity.updatedAtDate.indexOf('T');
-        String substringOfUpdatedAtDate = ScreenSlidePagerActivity.updatedAtDate.substring(0, indexOfT);
+        String s = ScreenSlidePagerActivity.convertedServingDate;
 
         // Checks if the date from retrofit is equal to the local date
-        if (substringOfUpdatedAtDate.equals(localDate)) {
+        if (s.equals(localDate)) {
             isDateCorrect = true;
         } else {
             isDateCorrect = false;
