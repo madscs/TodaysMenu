@@ -13,13 +13,10 @@ import retrofit.http.Path;
 // API Interface for Retrofit
 
 public interface MenuApi {
-    @GET("/menus")
+    @GET("/api/v1/menus")
     void getMenu(Callback<List<MenuModel>> response);
 
-    @GET("/menus?limit=1")
-    void getFirstMenuItem(Callback<List<MenuModel>> response);
-
-    @POST("/votes/{like}")
+    @POST("/api/v1/menus/:id/votes/{like}")
     void setVote(@Body LikeTask likeTask, @Path("like") String like,
                  Callback<List<MenuModel>> response);
 }

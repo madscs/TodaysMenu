@@ -12,7 +12,6 @@ import android.view.View;
 import com.unwire.todaysmenu.API.MenuApi;
 import com.unwire.todaysmenu.model.MenuModel;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import retrofit.Callback;
@@ -23,7 +22,7 @@ import retrofit.client.Response;
 public class ScreenSlidePagerActivity extends FragmentActivity {
 
     // Retrofit
-    String API = "https://unwire-menu.herokuapp.com";
+    String API = "http://todays-menu.herokuapp.com";
     RestAdapter restAdapter = new RestAdapter.Builder()
             .setEndpoint(API)
             .setLogLevel(RestAdapter.LogLevel.FULL)

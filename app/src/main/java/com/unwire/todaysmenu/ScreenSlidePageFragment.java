@@ -39,7 +39,7 @@ public class ScreenSlidePageFragment extends Fragment {
             visitFacebookTextView;
     private ImageView cakeDayImageView, thumbsDownId, thumbsUpId, forkAndKnifeImageView;
 
-    // String values
+    // DeviceId
     private String deviceId;
 
     // int value to determine the current fragment
@@ -51,7 +51,7 @@ public class ScreenSlidePageFragment extends Fragment {
     int whiteColor = Color.parseColor("#FFFFFF");
 
     // Retrofit
-    String API = "https://unwire-menu.herokuapp.com";
+    String API = "http://todays-menu.herokuapp.com";
     RestAdapter restAdapter = new RestAdapter.Builder()
             .setEndpoint(API)
             .setLogLevel(RestAdapter.LogLevel.FULL)
@@ -177,10 +177,8 @@ public class ScreenSlidePageFragment extends Fragment {
         // Changes the date of the month for testing purposes
         // localDate = localDate.replaceAll("16", "17");
 
-        String s = ScreenSlidePagerActivity.convertedServingDate;
-
         // Checks if the date from retrofit is equal to the local date
-        if (s.equals(localDate)) {
+        if (ScreenSlidePagerActivity.convertedServingDate.equals(localDate)) {
             isDateCorrect = true;
         } else {
             isDateCorrect = false;
