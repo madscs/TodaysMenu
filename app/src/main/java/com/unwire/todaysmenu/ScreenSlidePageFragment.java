@@ -103,8 +103,7 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
         thumbsUpId = (ImageView) view.findViewById(R.id.thumbsUpId);
 
         testTextView = (TextView) view.findViewById(R.id.testTextView);
-//        testTextView.setText(ScreenSlidePagerActivity.convertedServingDate
-//                + String.valueOf(" Fragment #" + currentFragment));
+        testTextView.setText(ScreenSlidePagerActivity.convertedServingDate);
 
         thumbsDownId.setOnClickListener(this);
         thumbsUpId.setOnClickListener(this);
@@ -158,7 +157,6 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
                             } else {
                                 cakeDayImageView.setVisibility(View.INVISIBLE);
                             }
-                            testTextView.setText(String.valueOf("MenuId: " + menuId));
                         }
 
                         @Override

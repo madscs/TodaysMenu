@@ -166,6 +166,4 @@ public class MenuModel {
     public void setUserVote(Integer userVote) {
         this.userVote = userVote;
     }
-
-
 }
