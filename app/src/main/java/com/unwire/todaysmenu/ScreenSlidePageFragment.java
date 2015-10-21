@@ -193,16 +193,20 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.thumbsUpId:
-                likes++;
-                dislikes--;
-                userVote = VOTE_ID_LIKE;
-                onVote(VOTE_ID_LIKE);
+                if (userVote != VOTE_ID_LIKE) {
+                    likes++;
+                    dislikes--;
+                    userVote = VOTE_ID_LIKE;
+                    onVote(VOTE_ID_LIKE);
+                }
                 break;
             case R.id.thumbsDownId:
-                dislikes++;
-                likes--;
-                userVote = VOTE_ID_DISLIKE;
-                onVote(VOTE_ID_DISLIKE);
+                if (userVote != VOTE_ID_DISLIKE) {
+                    dislikes++;
+                    likes--;
+                    userVote = VOTE_ID_DISLIKE;
+                    onVote(VOTE_ID_DISLIKE);
+                }
                 break;
         }
         setDislikeAndLikeColor();
