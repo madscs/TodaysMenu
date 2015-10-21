@@ -1,10 +1,10 @@
 package com.unwire.todaysmenu;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.telephony.TelephonyManager;
+import android.text.method.LinkMovementMethod;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,46 +17,45 @@ import com.unwire.todaysmenu.model.MenuModel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class ScreenSlidePageFragment extends Fragment {
+public class ScreenSlidePageFragment extends Fragment implements View.OnClickListener {
 
-    // Liking states (to be replaced after backend update)
-    // From here -->
-    public static final int NON_VOTED_STATE = 0;
-    public static final int LIKED_STATE = 1;
-    public static final int DISLIKED_STATE = 2;
-    public int state = 0;
-    // <-- To here
+    public static final int VOTE_ID_LIKE = 1;
+    public static final int VOTE_ID_DISLIKE = -1;
 
     // Text and Image Views
     private TextView sidesTextView, mainCourseTextView, testTextView, likesTextView, dislikesTextView,
             visitFacebookTextView;
-    private ImageView cakeDayImageView, thumbsDownId, thumbsUpId, forkAndKnifeImageView;
-
-    // DeviceId
-    private String deviceId;
+    private ImageView cakeDayImageView, thumbsDownId, thumbsUpId;
 
     // int value to determine the current fragment
     // Should never be static (fragments won't update properly)
     int currentFragment = 0;
+
+    int userVote = 0;
+
+    int likes;
+
+    int dislikes;
 
     // Colours for like and dislike buttons
     int greyColor = Color.parseColor("#979797");
     int whiteColor = Color.parseColor("#FFFFFF");
 
     // Retrofit
-    String API = "http://todays-menu.herokuapp.com";
+    String API = "https://todays-menu.herokuapp.com";
     RestAdapter restAdapter = new RestAdapter.Builder()
             .setEndpoint(API)
             .setLogLevel(RestAdapter.LogLevel.FULL)
             .build();
     MenuApi menu = restAdapter.create(MenuApi.class);
+
+    Integer menuId = 0;
 
     // Method to get the current fragment
     static ScreenSlidePageFragment newInstance(int num) {
@@ -102,16 +101,19 @@ public class ScreenSlidePageFragment extends Fragment {
         cakeDayImageView = (ImageView) view.findViewById(R.id.cakeDayId);
         thumbsDownId = (ImageView) view.findViewById(R.id.thumbsDownId);
         thumbsUpId = (ImageView) view.findViewById(R.id.thumbsUpId);
-        forkAndKnifeImageView = (ImageView) view.findViewById(R.id.forkAndKnifeId);
 
         testTextView = (TextView) view.findViewById(R.id.testTextView);
-        testTextView.setText(ScreenSlidePagerActivity.convertedServingDate
-                + String.valueOf(" Fragment #" + currentFragment));
+//        testTextView.setText(ScreenSlidePagerActivity.convertedServingDate
+//                + String.valueOf(" Fragment #" + currentFragment));
+
+        thumbsDownId.setOnClickListener(this);
+        thumbsUpId.setOnClickListener(this);
 
         // If menu has not arrived, else show today's menu
         if (currentFragment == -1) {
             sidesTextView.setVisibility(View.INVISIBLE);
             visitFacebookTextView.setVisibility(View.VISIBLE);
+            visitFacebookTextView.setMovementMethod(LinkMovementMethod.getInstance());
             mainCourseTextView.setText(R.string.menu_not_ready_text);
             cakeDayImageView.setVisibility(View.GONE);
             likesTextView.setVisibility(View.INVISIBLE);
@@ -120,45 +122,52 @@ public class ScreenSlidePageFragment extends Fragment {
             thumbsUpId.setVisibility(View.INVISIBLE);
         } else {
             // Retrofit getMenu
-            menu.getMenu(new Callback<List<MenuModel>>() {
-                @Override
-                public void success(List<MenuModel> menuModel, Response response) {
-                    // Set like and dislike values from retrofit
-                    likesTextView.setText(String.valueOf(menuModel
-                            .get(currentFragment)
-                            .getLikes()));
-                    dislikesTextView.setText(String.valueOf(menuModel
-                            .get(currentFragment)
-                            .getDislikes()));
+            menu.getMenu(setHttpBasicAuth(),
+                    new Callback<List<MenuModel>>() {
+                        @Override
+                        public void success(List<MenuModel> menuModel, Response response) {
+                            // Set current menuId
+                            menuId = menuModel.get(currentFragment).getId();
 
-                    sidesTextView.setVisibility(View.VISIBLE);
-                    visitFacebookTextView.setVisibility(View.INVISIBLE);
-                    likesTextView.setVisibility(View.VISIBLE);
-                    dislikesTextView.setVisibility(View.VISIBLE);
-                    thumbsDownId.setVisibility(View.VISIBLE);
-                    thumbsUpId.setVisibility(View.VISIBLE);
+                            // Set current userVote
+                            userVote = menuModel.get(currentFragment).getUserVote();
 
-                    // Set main course and sides text for menu of the day
-                    sidesTextView.setText(menuModel.get(currentFragment).getSides());
-                    mainCourseTextView.setText(menuModel.get(currentFragment).getMainCourse());
+                            likes = menuModel.get(currentFragment).getLikes();
+                            dislikes = menuModel.get(currentFragment).getDislikes();
 
-                    // Should cake day sign be shown or not
-                    if (menuModel.get(currentFragment).getCake()) {
-                        cakeDayImageView.setVisibility(View.VISIBLE);
-                    } else {
-                        cakeDayImageView.setVisibility(View.INVISIBLE);
-                    }
-                }
+                            // Set like and dislike values from retrofit
+                            likesTextView.setText(String.valueOf(likes));
+                            dislikesTextView.setText(String.valueOf(dislikes));
 
-                @Override
-                public void failure(RetrofitError error) {
-                    sidesTextView.setText(error.getMessage());
-                    mainCourseTextView.setText(error.getMessage());
-                }
-            });
+                            sidesTextView.setVisibility(View.VISIBLE);
+                            visitFacebookTextView.setVisibility(View.INVISIBLE);
+                            likesTextView.setVisibility(View.VISIBLE);
+                            dislikesTextView.setVisibility(View.VISIBLE);
+                            thumbsDownId.setVisibility(View.VISIBLE);
+                            thumbsUpId.setVisibility(View.VISIBLE);
+
+                            setDislikeAndLikeColor();
+
+                            // Set main course and sides text for menu of the day
+                            sidesTextView.setText(menuModel.get(currentFragment).getSides());
+                            mainCourseTextView.setText(menuModel.get(currentFragment).getMainCourse());
+
+                            // Should cake day sign be shown or not
+                            if (menuModel.get(currentFragment).getCake()) {
+                                cakeDayImageView.setVisibility(View.VISIBLE);
+                            } else {
+                                cakeDayImageView.setVisibility(View.INVISIBLE);
+                            }
+                            testTextView.setText(String.valueOf("MenuId: " + menuId));
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            sidesTextView.setText(error.getMessage());
+                            mainCourseTextView.setText(error.getMessage());
+                        }
+                    });
         }
-
-        getDeviceId();
     }
 
     private boolean isLocalDateCorrect() {
@@ -174,9 +183,6 @@ public class ScreenSlidePageFragment extends Fragment {
         // Format date to be with '-' instead of '/'
         localDate = localDate.replaceAll("/", "-");
 
-        // Changes the date of the month for testing purposes
-        // localDate = localDate.replaceAll("16", "17");
-
         // Checks if the date from retrofit is equal to the local date
         if (ScreenSlidePagerActivity.convertedServingDate.equals(localDate)) {
             isDateCorrect = true;
@@ -189,68 +195,59 @@ public class ScreenSlidePageFragment extends Fragment {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.thumbsUpId:
-                onThumbsUp();
+                likes++;
+                dislikes--;
+                userVote = VOTE_ID_LIKE;
+                onVote(VOTE_ID_LIKE);
                 break;
             case R.id.thumbsDownId:
-                onThumbsDown();
+                dislikes++;
+                likes--;
+                userVote = VOTE_ID_DISLIKE;
+                onVote(VOTE_ID_DISLIKE);
                 break;
         }
+        setDislikeAndLikeColor();
+        likesTextView.setText(String.valueOf(likes));
+        dislikesTextView.setText(String.valueOf(dislikes));
     }
 
-    private void getDeviceId() {
-        final TelephonyManager tm = (TelephonyManager) getView().getContext().getSystemService(Context.TELEPHONY_SERVICE);
+    private void onVote(int voteId) {
+        // Retrofit setVote
+        menu.setVote(new VoteTask((voteId)),
+                setHttpBasicAuth(),
+                menuId,
+                new Callback<List<MenuModel>>() {
+                    @Override
+                    public void success(List<MenuModel> menuModel, Response response) {
+                    }
 
-        final String tmDevice, tmSerial, androidId;
-        tmDevice = "" + tm.getDeviceId();
-        tmSerial = "" + tm.getSimSerialNumber();
-        androidId = "" + android.provider.Settings.Secure.getString(getView().getContext().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-
-        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
-        deviceId = deviceUuid.toString();
-    }
-
-    private void onThumbsUp() {
-        menu.setVote(new LikeTask(deviceId), "like", new Callback<List<MenuModel>>() {
-            @Override
-            public void success(List<MenuModel> menuModel, Response response) {
-                // int state should be replaced when backend is implemented
-                state = LIKED_STATE;
-                setDislikeAndLikeColor();
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                likesTextView.setText(error.getMessage());
-            }
-        });
-    }
-
-    private void onThumbsDown() {
-        menu.setVote(new LikeTask((deviceId)), "dislike", new Callback<List<MenuModel>>() {
-            @Override
-            public void success(List<MenuModel> menuModel, Response response) {
-                // int state should be replaced when backend is implemented
-                state = DISLIKED_STATE;
-                setDislikeAndLikeColor();
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                dislikesTextView.setText(error.getMessage());
-            }
-        });
+                    @Override
+                    public void failure(RetrofitError error) {
+                        likesTextView.setText(error.getMessage());
+                        dislikesTextView.setText(error.getMessage());
+                    }
+                });
     }
 
     public void setDislikeAndLikeColor() {
-        if (state == NON_VOTED_STATE) {
+        // Determine if current menu is liked or disliked already
+        if (userVote == 0) {
             thumbsUpId.setColorFilter(whiteColor);
             thumbsDownId.setColorFilter(whiteColor);
-        } else if (state == LIKED_STATE) {
+        } else if (userVote == 1) {
             thumbsUpId.setColorFilter(greyColor);
             thumbsDownId.setColorFilter(whiteColor);
         } else {
             thumbsUpId.setColorFilter(whiteColor);
             thumbsDownId.setColorFilter(greyColor);
         }
+    }
+
+    public String setHttpBasicAuth() {
+        String username = "someHardcodedAndroidDeviceToken";
+        String password = "0e0f90dcee78b2a8c5577ea37ecc23616515fe604ec7b3c7180e90d99aaa906d";
+        String credentials = username + ":" + password;
+        return "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
     }
 }
