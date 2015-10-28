@@ -19,6 +19,8 @@ import com.unwire.todaysmenu.model.MenuModel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
+import java.util.TimeZone;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -45,9 +47,14 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
     int GREY_COLOR = Color.parseColor("#979797");
     int WHITE_COLOR = Color.parseColor("#FFFFFF");
 
+    // Boolean for checking date
+    boolean isDateCorrect;
+
     Integer menuId = 0;
     private Integer servingDate;
     private String convertedServingDate;
+    private String backendDate;
+    private SimpleDateFormat dateFormat;
 
     // Method to get the current fragment
     static ScreenSlidePageFragment newInstance(int num) {
@@ -65,7 +72,8 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Set current fragment according to whether or not the date is correct.
-        if (isLocalDateCorrect()) {
+
+        if(isLocalDateCorrect()){
             CURRENT_FRAGMENT = getArguments() != null ? getArguments().getInt("num") : 1;
         } else {
             CURRENT_FRAGMENT = (getArguments() != null ? getArguments().getInt("num") : 1) - 1;
@@ -91,43 +99,31 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
 
     private void showMenu() {
         // If menu has not arrived, else show today's menu
-        if (CURRENT_FRAGMENT == -1) {
-            sidesTextView.setVisibility(View.INVISIBLE);
-            visitFacebookTextView.setVisibility(View.VISIBLE);
-            visitFacebookTextView.setMovementMethod(LinkMovementMethod.getInstance());
-            mainCourseTextView.setText(R.string.menu_not_ready_text);
-            cakeDayImageView.setVisibility(View.GONE);
-            likesTextView.setVisibility(View.INVISIBLE);
-            dislikesTextView.setVisibility(View.INVISIBLE);
-            thumbsDownId.setVisibility(View.INVISIBLE);
-            thumbsUpId.setVisibility(View.INVISIBLE);
-        } else {
-            MenuApiManager.getService().getMenu(setHttpBasicAuth(), new Callback<List<MenuModel>>() {
-                @SuppressLint("LongLogTag")
-                @Override
-                public void success(List<MenuModel> menuModels, Response response) {
-                    // Set current menuId
-                    menuId = menuModels.get(CURRENT_FRAGMENT).getId();
+        MenuApiManager.getService().getMenu(setHttpBasicAuth(), new Callback<List<MenuModel>>() {
+            @SuppressLint("LongLogTag")
+            @Override
+            public void success(List<MenuModel> menuModels, Response response) {
 
+//                isLocalDateCorrect(menuModels);
+
+//                    testTextView.setText(DateCache.getInstance().getDate());
+
+                if (CURRENT_FRAGMENT == -1) {
+                    sidesTextView.setVisibility(View.INVISIBLE);
+                    visitFacebookTextView.setVisibility(View.VISIBLE);
+                    visitFacebookTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                    mainCourseTextView.setText(R.string.menu_not_ready_text);
+                    cakeDayImageView.setVisibility(View.GONE);
+                    likesTextView.setVisibility(View.INVISIBLE);
+                    dislikesTextView.setVisibility(View.INVISIBLE);
+                    thumbsDownId.setVisibility(View.INVISIBLE);
+                    thumbsUpId.setVisibility(View.INVISIBLE);
+                } else {
                     // Set current userVote
                     USER_VOTE = menuModels.get(CURRENT_FRAGMENT).getUserVote();
 
                     LIKES = menuModels.get(CURRENT_FRAGMENT).getLikes();
                     DISLIKES = menuModels.get(CURRENT_FRAGMENT).getDislikes();
-
-                    // Get the date from retrofit
-                    servingDate = menuModels.get(CURRENT_FRAGMENT).getServingDate();
-
-                    convertedServingDate = String.valueOf(new java.util.Date((long) servingDate * 1000));
-
-                    // Remove last 19 chars of String to get a simpler date
-                    convertedServingDate = convertedServingDate.substring(0, convertedServingDate.length() - 19);
-
-                    Log.v(TAG, "MenuModels convertedServingDate = " + convertedServingDate);
-
-                    DateCache.getInstance().setDate(convertedServingDate);
-
-                    testTextView.setText(DateCache.getInstance().getDate());
 
                     // Set like and dislike values from retrofit
                     likesTextView.setText(String.valueOf(LIKES));
@@ -139,6 +135,8 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
                     dislikesTextView.setVisibility(View.VISIBLE);
                     thumbsDownId.setVisibility(View.VISIBLE);
                     thumbsUpId.setVisibility(View.VISIBLE);
+
+                    testTextView.setText(dateFormat.format((long) menuModels.get(CURRENT_FRAGMENT).getServingDate() * 1000));
 
                     setDislikeAndLikeColor();
 
@@ -153,15 +151,15 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
                         cakeDayImageView.setVisibility(View.INVISIBLE);
                     }
                 }
+            }
 
-                @Override
-                public void failure(RetrofitError error) {
-                    error.getMessage();
-                    sidesTextView.setText(error.getMessage());
-                    mainCourseTextView.setText(error.getMessage());
-                }
-            });
-        }
+            @Override
+            public void failure(RetrofitError error) {
+                error.getMessage();
+                sidesTextView.setText(error.getMessage());
+                mainCourseTextView.setText(error.getMessage());
+            }
+        });
     }
 
     private void assignViews(View view) {
@@ -183,24 +181,25 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
     }
 
     private boolean isLocalDateCorrect() {
-        boolean isDateCorrect;
-
-        java.util.TimeZone tz = java.util.TimeZone.getTimeZone("GMT+1");
-
         // Set format of date
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd");
-        Calendar cal = Calendar.getInstance(tz);
+        dateFormat = new SimpleDateFormat("EEE MMM dd yyyy");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+1"));
+        Calendar cal = Calendar.getInstance();
         String localDate = dateFormat.format(cal.getTime());
 
-        // Format date to be with '-' instead of '/'
-        localDate = localDate.replaceAll("/", "-");
+        backendDate = dateFormat.format((long) DateCache.getInstance().getDate() * 1000);
 
-        // Checks if the date from retrofit is equal to the local date
-        if (ScreenSlidePagerActivity.convertedServingDate.equals(localDate)) {
+        Log.v(TAG, "MenuModels unix backend = " + backendDate);
+        Log.v(TAG, "MenuModels unix now = " + localDate);
+        Log.v(TAG, "MenuModels unix timestamp = " + DateCache.getInstance().getDate());
+
+        if (localDate.equals(backendDate)) {
             isDateCorrect = true;
         } else {
             isDateCorrect = false;
         }
+
+        Log.v(TAG, "MenuModels unix boolean = " + isDateCorrect);
         return isDateCorrect;
     }
 
@@ -209,7 +208,7 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
             case R.id.thumbsUpId:
                 if (USER_VOTE != VOTE_ID_LIKE) {
                     LIKES++;
-                    if(USER_VOTE != 0){
+                    if (USER_VOTE != 0) {
                         DISLIKES--;
                     }
                     USER_VOTE = VOTE_ID_LIKE;
@@ -219,7 +218,7 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
             case R.id.thumbsDownId:
                 if (USER_VOTE != VOTE_ID_DISLIKE) {
                     DISLIKES++;
-                    if(USER_VOTE != 0){
+                    if (USER_VOTE != 0) {
                         LIKES--;
                     }
                     USER_VOTE = VOTE_ID_DISLIKE;

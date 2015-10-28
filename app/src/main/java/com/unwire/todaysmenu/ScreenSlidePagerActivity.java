@@ -107,16 +107,16 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
                 NUM_PAGES = menuModels.size();
 
                 // Get the date from retrofit
-                servingDate = menuModels.get(FIRST_INDEX).getServingDate();
-
-                Log.v(TAG, "MenuModels getId = " + servingDate);
-
-                convertedServingDate = String.valueOf(new java.util.Date((long) servingDate * 1000));
-
-                // Remove last 19 chars of String to get a simpler date
-                convertedServingDate = convertedServingDate.substring(0, convertedServingDate.length() - 19);
-
-                DateCache.getInstance().setDate(convertedServingDate);
+//                servingDate = menuModels.get(FIRST_INDEX).getServingDate();
+//
+//                convertedServingDate = String.valueOf(new java.util.Date((long) servingDate * 1000));
+//
+//                // Remove last 19 chars of String to get a simpler date
+//                convertedServingDate = convertedServingDate.substring(0, convertedServingDate.length() - 19);
+//
+//                Log.v(TAG, "MenuModels convertedServingDate = " + convertedServingDate);
+//
+                DateCache.getInstance().setDate(menuModels.get(0).getServingDate());
 
                 // Notify PagerAdapter that we're changing the value of NUM_PAGES
                 mPagerAdapter.notifyDataSetChanged();

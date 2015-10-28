@@ -6,7 +6,7 @@ public class DateCache {
 
     private static final String TAG = "DateCache";
 
-    private String date;
+    private Integer date;
 
     private static DateCache dateCache;
 
@@ -17,12 +17,12 @@ public class DateCache {
         return dateCache;
     }
 
-    public String getDate() {
+    public Integer getDate() {
         Log.v(TAG, "Date = " + date);
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Integer date) {
         this.date = date;
         // for persisted data, use eg. DB or SharedPreferences
     }
