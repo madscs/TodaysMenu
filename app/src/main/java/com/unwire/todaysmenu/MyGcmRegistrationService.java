@@ -43,7 +43,8 @@ public class MyGcmRegistrationService extends IntentService {
 
                 Log.v(TAG, "Token GCM Reg = " + token);
 
-                getBaseContext().sendBroadcast(new Intent("com.unwire.todaysmenu.REGISTER_DEVICE").putExtra("GCM_REG_ID", token));
+                Intent in = new Intent(new Intent("com.unwire.todaysmenu.REGISTER_DEVICE").putExtra("GCM_REG_ID", token));
+                sendBroadcast(in);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -53,7 +54,6 @@ public class MyGcmRegistrationService extends IntentService {
     private void sendRegistrationToServer(String token) {
         // Retrofit getMenu
         MenuApiManager.getService().postToken(new TokenTask(token, "android"), new Callback<AuthenticationModel>() {
-            @SuppressLint("LongLogTag")
             @Override
             public void success(AuthenticationModel authenticationModel, Response response) {
                 TokenCache.getInstance().setToken(String.valueOf(authenticationModel.getAuthToken()));

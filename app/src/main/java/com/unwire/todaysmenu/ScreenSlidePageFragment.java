@@ -1,11 +1,9 @@
 package com.unwire.todaysmenu;
 
-import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.method.LinkMovementMethod;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +17,6 @@ import com.unwire.todaysmenu.model.MenuModel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 import java.util.TimeZone;
 
 import retrofit.Callback;
@@ -35,7 +32,7 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
     int USER_VOTE = 0, LIKES, DISLIKES;
 
     // Text and Image Views
-    private TextView sidesTextView, mainCourseTextView, testTextView, likesTextView, dislikesTextView,
+    private TextView sidesTextView, mainCourseTextView, dateTextView, likesTextView, dislikesTextView,
             visitFacebookTextView;
     private ImageView cakeDayImageView, thumbsDownId, thumbsUpId;
 
@@ -51,9 +48,6 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
     boolean isDateCorrect;
 
     Integer menuId = 0;
-    private Integer servingDate;
-    private String convertedServingDate;
-    private String backendDate;
     private SimpleDateFormat dateFormat;
 
     // Method to get the current fragment
@@ -71,9 +65,9 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Set current fragment according to whether or not the date is correct.
 
-        if(isLocalDateCorrect()){
+        // Set current fragment according to whether or not the date is correct.
+        if (isLocalDateCorrect()) {
             CURRENT_FRAGMENT = getArguments() != null ? getArguments().getInt("num") : 1;
         } else {
             CURRENT_FRAGMENT = (getArguments() != null ? getArguments().getInt("num") : 1) - 1;
@@ -99,14 +93,9 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
 
     private void showMenu() {
         // If menu has not arrived, else show today's menu
-        MenuApiManager.getService().getMenu(setHttpBasicAuth(), new Callback<List<MenuModel>>() {
-            @SuppressLint("LongLogTag")
+        MenuApiManager.getService().getMenu(new Callback<List<MenuModel>>() {
             @Override
             public void success(List<MenuModel> menuModels, Response response) {
-
-//                isLocalDateCorrect(menuModels);
-
-//                    testTextView.setText(DateCache.getInstance().getDate());
 
                 if (CURRENT_FRAGMENT == -1) {
                     sidesTextView.setVisibility(View.INVISIBLE);
@@ -119,6 +108,9 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
                     thumbsDownId.setVisibility(View.INVISIBLE);
                     thumbsUpId.setVisibility(View.INVISIBLE);
                 } else {
+                    // Sets menuId for voting
+                    menuId = menuModels.get(CURRENT_FRAGMENT).getId();
+
                     // Set current userVote
                     USER_VOTE = menuModels.get(CURRENT_FRAGMENT).getUserVote();
 
@@ -129,6 +121,7 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
                     likesTextView.setText(String.valueOf(LIKES));
                     dislikesTextView.setText(String.valueOf(DISLIKES));
 
+                    // Set visibility for text and image views
                     sidesTextView.setVisibility(View.VISIBLE);
                     visitFacebookTextView.setVisibility(View.INVISIBLE);
                     likesTextView.setVisibility(View.VISIBLE);
@@ -136,7 +129,7 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
                     thumbsDownId.setVisibility(View.VISIBLE);
                     thumbsUpId.setVisibility(View.VISIBLE);
 
-                    testTextView.setText(dateFormat.format((long) menuModels.get(CURRENT_FRAGMENT).getServingDate() * 1000));
+                    dateTextView.setText(dateFormat.format((long) menuModels.get(CURRENT_FRAGMENT).getServingDate() * 1000));
 
                     setDislikeAndLikeColor();
 
@@ -166,7 +159,7 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
         // Assign TextViews
         sidesTextView = (TextView) view.findViewById(R.id.sidesText);
         mainCourseTextView = (TextView) view.findViewById(R.id.mainCourseText);
-        testTextView = (TextView) view.findViewById(R.id.testTextView);
+        dateTextView = (TextView) view.findViewById(R.id.dateTextView);
         likesTextView = (TextView) view.findViewById(R.id.likesText);
         dislikesTextView = (TextView) view.findViewById(R.id.dislikesText);
         visitFacebookTextView = (TextView) view.findViewById(R.id.visitFacebookText);
@@ -176,8 +169,8 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
         thumbsDownId = (ImageView) view.findViewById(R.id.thumbsDownId);
         thumbsUpId = (ImageView) view.findViewById(R.id.thumbsUpId);
 
-        testTextView = (TextView) view.findViewById(R.id.testTextView);
-        testTextView.setText(ScreenSlidePagerActivity.convertedServingDate);
+        dateTextView = (TextView) view.findViewById(R.id.dateTextView);
+        dateTextView.setText(ScreenSlidePagerActivity.convertedServingDate);
     }
 
     private boolean isLocalDateCorrect() {
@@ -185,21 +178,21 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
         dateFormat = new SimpleDateFormat("EEE MMM dd yyyy");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+1"));
         Calendar cal = Calendar.getInstance();
+
+        // Initialise local and backend date
         String localDate = dateFormat.format(cal.getTime());
+        String backendDate = dateFormat.format((long) DateCache.getInstance().getDate() * 1000);
 
-        backendDate = dateFormat.format((long) DateCache.getInstance().getDate() * 1000);
+        // Write in logs
+        Log.v(TAG, "Backend date = " + backendDate);
+        Log.v(TAG, "Local date = " + localDate);
 
-        Log.v(TAG, "MenuModels unix backend = " + backendDate);
-        Log.v(TAG, "MenuModels unix now = " + localDate);
-        Log.v(TAG, "MenuModels unix timestamp = " + DateCache.getInstance().getDate());
-
+        // Check if the dates are the same
         if (localDate.equals(backendDate)) {
             isDateCorrect = true;
         } else {
             isDateCorrect = false;
         }
-
-        Log.v(TAG, "MenuModels unix boolean = " + isDateCorrect);
         return isDateCorrect;
     }
 
@@ -232,10 +225,9 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
     }
 
     private void onVote(int voteId) {
-        // Retrofit setVote
-        MenuApiManager.getService().setVote(setHttpBasicAuth(), new VoteTask(voteId), menuId,
+        // Retrofit setVote (liking and disliking)
+        MenuApiManager.getService().setVote(new VoteTask(voteId), menuId,
                 new Callback<List<MenuModel>>() {
-                    @SuppressLint("LongLogTag")
                     @Override
                     public void success(List<MenuModel> menuModels, Response response) {
 
@@ -262,14 +254,5 @@ public class ScreenSlidePageFragment extends Fragment implements View.OnClickLis
             thumbsUpId.setColorFilter(WHITE_COLOR);
             thumbsDownId.setColorFilter(GREY_COLOR);
         }
-    }
-
-    public String setHttpBasicAuth() {
-        // Outcommented code for later as it's hardcoded for now
-        String username = TokenCache.getInstance().getToken();
-//        String username = "someHardcodedAndroidDeviceToken";
-        String password = "0e0f90dcee78b2a8c5577ea37ecc23616515fe604ec7b3c7180e90d99aaa906d";
-        String credentials = username + ":" + password;
-        return "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
     }
 }
